@@ -2,10 +2,13 @@ const { ApolloServer, gql } = require("apollo-server-express");
 const { createWriteStream, existsSync, mkdirSync } = require("fs");
 const path = require("path");
 const express = require("express");
+const graphqlUploadExpress = require('graphql-upload/graphqlUploadExpress.js');
 
 const files = [];
 
 const typeDefs = gql`
+  scalar Upload
+
   type Query {
     files: [String]
   }
@@ -21,7 +24,10 @@ const resolvers = {
   },
   Mutation: {
     uploadFile: async (_, { file }) => {
-      const { createReadStream, filename } = await file;
+      const fileObj = await file;
+      const { createReadStream, filename } = fileObj.file;
+
+      console.log(filename)
 
       await new Promise(res =>
         createReadStream()
@@ -38,11 +44,19 @@ const resolvers = {
 
 existsSync(path.join(__dirname, "../images")) || mkdirSync(path.join(__dirname, "../images"));
 
-const server = new ApolloServer({ typeDefs, resolvers });
-const app = express();
-app.use("/images", express.static(path.join(__dirname, "../images")));
-server.applyMiddleware({ app });
+const startServer = async () => {
+  const server = new ApolloServer({ typeDefs, resolvers, uploads: false });
+  const app = express();
+  app.use("/images", express.static(path.join(__dirname, "../images")));
 
-app.listen(4000, () => {
-  console.log(`🚀  Server ready at http://localhost:4000/`);
-});
+  await server.start()
+  app.use(graphqlUploadExpress());
+  server.applyMiddleware({ app });
+
+  app.listen(4000, () => {
+    console.log(`🚀  Server ready at http://localhost:4000/`);
+  });
+
+}
+
+startServer()
