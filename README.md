@@ -17,8 +17,3 @@ Install packages:
 Starting project:
 
 `yarn start`
-
-
-### Author :books:
-
-[Ahmed Alatawi](https://github.com/AhmedAlatawi)
