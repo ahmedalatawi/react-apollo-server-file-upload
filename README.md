@@ -14,6 +14,6 @@ Install packages:
 
 `yarn install`
 
-Starting project:
+Start project:
 
 `yarn start`
